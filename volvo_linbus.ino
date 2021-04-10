@@ -20,19 +20,14 @@ SoftwareSerial LINBusSerial(RX_PIN, TX_PIN);
 
 // MCP2004 LIN bus frame:
 // ZERO_BYTE SYN_BYTE ID_BYTE DATA_BYTES.. CHECKSUM_BYTE
+// header:
+//  zero_byte = break
+//  SYN_BYTE = synchronisation byte
+// ID_BYTE = identification byte
+// message:
+// DATA_BYTES = data byte, 1 - 4 bytes
+// checksum_byte = checksum calculated
 
-// Volvo V50 2007 SWM key codes
-
-// BTN_NEXT       20 0 10 0 0 EF
-// BTN_PREV       20 0 2 0 0 FD
-// BTN_VOL_UP     20 0 0 1 0 FE
-// BTN_VOL_DOWN   20 0 80 0 0 7F
-// BTN_BACK       20 0 1 0 0 F7
-// BTN_ENTER      20 0 8 0 0 FE
-// BTN_UP         20 1 0 0 0 FE
-// BTN_DOWN       20 2 0 0 0 FD
-// BTN_LEFT       20 4 0 0 0 FB
-// BTN_RIGHT      20 8 0 0 0 F7
 
 // IGN_KEY_ON     50 E 0 F1
 
@@ -62,7 +57,7 @@ void loop() {
   if (LINBusSerial.available()) {
     b = LINBusSerial.read();
     n = frame.num_bytes();
-
+    // if sync field & more than 2 bytes in frame and previouse frame is zero
     if (b == SYN_FIELD && n > 2 && frame.get_byte(n - 1) == 0) {
       digitalWrite(LED_BUILTIN, HIGH);
       frame.pop_byte();
