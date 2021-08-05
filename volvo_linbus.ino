@@ -6,11 +6,11 @@
 // Pins we use for MCP2004
 #define RX_PIN 10
 #define TX_PIN 11
-#define FAULT_PIN 14
+#define FAULT_PIN 13
 #define CS_PIN 8
 
 #define SYN_FIELD 0x55
-#define SWM_ID 0x20
+#define SWM_ID 0xC1
 
 SoftwareSerial LINBusSerial(RX_PIN, TX_PIN);
 
@@ -56,6 +56,7 @@ void setup() {
 void loop() {
   if (LINBusSerial.available()) {
     b = LINBusSerial.read();
+    
     n = frame.num_bytes();
     // if sync field & more than 2 bytes in frame and previouse frame is zero
     if (b == SYN_FIELD && n > 2 && frame.get_byte(n - 1) == 0) {
@@ -69,19 +70,21 @@ void loop() {
     } else {
       frame.append_byte(b);
     }
+  } else {
+    
   }
 }
 
 void handle_frame() {
-  if (frame.get_byte(0) != SWM_ID)
-    return;
+//  if (frame.get_byte(0) != SWM_ID)
+//    return;
 
   // skip zero values 20 0 0 0 0 FF
-  if (frame.get_byte(5) == 0xFF)
-    return;
-
-  if (!frame.isValid())
-    return;
+//    if (frame.get_byte(5) == 0xFF)
+//     return;
+//
+//    if (!frame.isValid())
+//     return;
 
 
   dump_frame();
@@ -89,10 +92,14 @@ void handle_frame() {
 
 void dump_frame() {
   for (i = 0; i < frame.num_bytes(); i++) {
+    if (i == 0) {
+        Serial.print("ID");
+        Serial.print(" ");
+        Serial.print(frame.get_byte(i), HEX);
+        Serial.println();
+    }
     Serial.print(frame.get_byte(i), HEX);
     Serial.print(" ");
   }
   Serial.println();
 }
-
-
